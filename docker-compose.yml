@@ -5,13 +5,15 @@ services:
       - "8000:8000"
     networks:
       - private-network
-
+    restart: always
   vue:
     build: ./vue-project
     ports:
       - "5173:5173"
     networks:
       - private-network
-
+    depends_on:
+      - fastapi
+    restart: always
 networks:
   private-network:
