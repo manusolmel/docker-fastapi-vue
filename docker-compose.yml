@@ -1,0 +1,17 @@
+services:
+  fastapi:
+    build: ./fastapi
+    ports:
+      - "8000:8000"
+    networks:
+      - private-network
+
+  vue:
+    build: ./vue-project
+    ports:
+      - "5173:5173"
+    networks:
+      - private-network
+
+networks:
+  private-network:
