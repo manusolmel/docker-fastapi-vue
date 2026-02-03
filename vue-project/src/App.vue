@@ -1,47 +1,53 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import { ref, onMounted } from 'vue'
+
+const motos = ref([])
+const nuevaMoto = ref({ brand: '', model: '', stock: true })
+
+const agregarMoto = async () => {
+  try {
+    const response = await fetch('http://localhost:8000/motos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(nuevaMoto.value)
+    })
+    
+    if (response.ok) {
+      const motoGuardada = await response.json()
+      motos.value.push(motoGuardada) 
+      nuevaMoto.value = { brand: '', model: '', stock: true } 
+    }
+  } catch (err) {
+    console.error("Error al guardar:", err)
+  }
+}
+onMounted(async () => {
+  try {
+    const response = await fetch('http://localhost:8000/motos')
+    motos.value = await response.json()
+    console.log("Motos cargadas:", motos.value)
+  } catch (error) {
+    console.error("Error conectando con el backend:", error)
+  }
+})
+
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+  <form @submit.prevent="agregarMoto" style="margin-bottom: 20px; border: 1px solid #444; padding: 15px;">
+  <h3>Añadir Nueva Moto</h3>
+  <input v-model="nuevaMoto.brand" placeholder="Marca (ej: Suzuki)" required>
+  <input v-model="nuevaMoto.model" placeholder="Modelo (ej: SV650)" required>
+  <label>
+    <input type="checkbox" v-model="nuevaMoto.stock"> ¿En Stock?
+  </label>
+  <button type="submit">Guardar Moto</button>
+</form>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+  <h1>Garaje de Motos</h1>
+  <ul>
+    <li v-for="moto in motos" :key="moto.id">
+      {{ moto.brand }} - {{ moto.model }} (Stock: {{ moto.stock }})
+    </li>
+  </ul>
 </template>
-
-<style scoped>
-header {
-  line-height: 1.5;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
-</style>

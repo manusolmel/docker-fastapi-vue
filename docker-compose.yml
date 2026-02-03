@@ -1,15 +1,33 @@
 services:
+
+  postgres:
+    image: postgres:16-alpine # imagen oficial de dockerhub
+    env_file:
+      - .env
+    volumes:
+      - './postgres_data:/var/lib/postgresql/data'
+    ports:
+      - 5432:5432
+    networks: 
+      - private-network
+    restart: always
+    
   fastapi:
     build: ./fastapi
+    env_file:
+      - .env
     ports:
       - "8000:8000"
     networks:
       - private-network
+    depends_on:
+      - postgres
     restart: always
+  
   vue:
     build: ./vue-project
     ports:
-      - "5173:5173"
+      - "5174:5173"
     networks:
       - private-network
     depends_on:
