@@ -1,7 +1,19 @@
 services:
 
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - private-network
+    depends_on:
+      - fastapi
+      - vue
+
   postgres:
-    image: postgres:16-alpine # imagen oficial de dockerhub
+    image: postgres:16-alpine 
     env_file:
       - .env
     volumes:
@@ -16,8 +28,8 @@ services:
     build: ./fastapi
     env_file:
       - .env
-    ports:
-      - "8000:8000"
+ #   ports:
+ #     - "8000:8000"
     networks:
       - private-network
     depends_on:
@@ -26,8 +38,8 @@ services:
   
   vue:
     build: ./vue-project
-    ports:
-      - "5174:5173"
+#    ports:
+#      - "5174:5173"
     networks:
       - private-network
     depends_on:

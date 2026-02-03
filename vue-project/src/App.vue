@@ -6,7 +6,7 @@ const nuevaMoto = ref({ brand: '', model: '', stock: true })
 
 const agregarMoto = async () => {
   try {
-    const response = await fetch('http://localhost:8000/motos', {
+    const response = await fetch('/motos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(nuevaMoto.value)
@@ -23,7 +23,7 @@ const agregarMoto = async () => {
 }
 onMounted(async () => {
   try {
-    const response = await fetch('http://localhost:8000/motos')
+    const response = await fetch('/motos')
     motos.value = await response.json()
     console.log("Motos cargadas:", motos.value)
   } catch (error) {
