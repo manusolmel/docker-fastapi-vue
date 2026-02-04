@@ -8,8 +8,20 @@ stages:
   - test
   - deploy
 
-construir-imagen:
+build_image:
   stage: build
   script:
     - cp .env.sample .env
     - docker compose build
+  
+integration_test:
+  stage: test
+  script:
+    
+    - cp env.sample .env
+    - docker compose up -d --wait
+    - docker compose ps
+
+    # usamos curl para hacer peticiones HTTP
+    - apk add --no-cache curl
+    - curl -f http://docker-fastapi-vue-nginx-1:80
