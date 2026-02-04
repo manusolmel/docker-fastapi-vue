@@ -24,4 +24,4 @@ integration_test:
 
     # usamos curl para hacer peticiones HTTP
     - apk add --no-cache curl
-    - curl -f http://docker-fastapi-vue-nginx-1:80
+    - curl -f http://docker:80
