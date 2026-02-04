@@ -18,7 +18,7 @@ integration_test:
   stage: test
   script:
     
-    - cp env.sample .env
+    - cp .env.sample .env
     - docker compose up -d --wait
     - docker compose ps
 
