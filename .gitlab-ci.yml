@@ -1,0 +1,15 @@
+image: docker:latest
+
+services:
+  - docker:dind
+
+stages:
+  - build
+  - test
+  - deploy
+
+construir-imagen:
+  stage: build
+  script:
+    - cp .env.sample .env
+    - docker compose build
