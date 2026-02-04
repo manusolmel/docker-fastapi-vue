@@ -28,19 +28,19 @@ integration_test:
     - apk add --no-cache curl
     - curl -f http://docker:80
     
-  push_to_registry:
-    stage: deploy
-    script:
-      - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-      
-      # Backend
-      - docker build -t $CI_REGISTRY_IMAGE/fastapi:latest ./fastapi
-      - docker push $CI_REGISTRY_IMAGE/fastapi:latest
+push_to_registry:
+  stage: deploy
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    
+    # Backend
+    - docker build -t $CI_REGISTRY_IMAGE/fastapi:latest ./fastapi
+    - docker push $CI_REGISTRY_IMAGE/fastapi:latest
 
-      # Frontend
-      - docker build -t $CI_REGISTRY_IMAGE/vue:latest ./vue-project
-      - docker push $CI_REGISTRY_IMAGE/vue:latest
-      
-      # Nginx
-      - docker build -t $CI_REGISTRY_IMAGE/nginx:latest ./nginx
-      - docker push $CI_REGISTRY_IMAGE/nginx:latest
+    # Frontend
+    - docker build -t $CI_REGISTRY_IMAGE/vue:latest ./vue-project
+    - docker push $CI_REGISTRY_IMAGE/vue:latest
+    
+    # Nginx
+    - docker build -t $CI_REGISTRY_IMAGE/nginx:latest ./nginx
+    - docker push $CI_REGISTRY_IMAGE/nginx:latest
