@@ -4,7 +4,7 @@ image: docker:latest
 #  - docker:dind
 services:
   - name: docker:dind
-  - command: ["--tls=false"]
+    command: ["--tls=false"]
 
 stages:
   - build
