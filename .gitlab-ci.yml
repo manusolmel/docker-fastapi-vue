@@ -1,8 +1,7 @@
 image: docker:latest
 
 services:
-  - name: docker:dind
-  - command: ["--tls=false"]
+  - docker:dind
 
 stages:
   - build
@@ -11,10 +10,6 @@ stages:
 
 variables:
   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-
-  DOCKER_HOST: tcp://docker:2375
-  DOCKER_TLS_CERTDIR: ""
-  DOCKER_DRIVER: overlay2
 
 build_image:
   stage: build
@@ -28,11 +23,10 @@ integration_test:
     - cp .env.sample .env
     - docker compose up -d --wait
     - docker compose ps
-
     # usamos curl para hacer peticiones HTTP
     - apk add --no-cache curl
     - curl -f http://docker:80
-    
+
 push_to_registry:
   stage: deploy
   script:
@@ -48,4 +42,4 @@ push_to_registry:
 
     # Nginx
     - docker build -t $CI_REGISTRY_IMAGE/nginx:latest ./nginx
-    - docker push $CI_REGISTRY_IMAGE/nginx:latest 
+    - docker push $CI_REGISTRY_IMAGE/nginx:latest
