@@ -1,7 +1,7 @@
-image: docker:24.0.5
+image: docker:latest
 
 services:
-  - name: docker:24.0.5-dind
+  - name: docker:dind
     command: ["--tls=false"]
 
 stages:
@@ -10,44 +10,35 @@ stages:
   - deploy
 
 variables:
-  DOCKER_HOST: tcp://docker:2375
-  DOCKER_TLS_CERTDIR: "" 
-  DOCKER_DRIVER: overlay2
   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_DRIVER: overlay2
 
-# FASE 1: BUILD
-build_check:
+build_image:
   stage: build
   script:
-    - echo "Comprobando construcción de imágenes..."
-    - docker build -t test-fastapi ./fastapi
-    - docker build -t test-vue ./vue-project
-
-# FASE 2: TEST DE INTEGRACIÓN
+    - apk add --no-cache docker-compose-plugin
+    
+    # Tu lógica original intacta:
+    - cp .env.sample .env
+    - docker compose build
+   
 integration_test:
   stage: test
   script:
-    - echo "Lanzando entorno de pruebas..."
-    - apk add --no-cache docker-compose-plugin
+    - apk add --no-cache docker-compose-plugin curl
     
     - cp .env.sample .env
     - docker compose up -d --wait
     - docker compose ps
-    
-    - apk add --no-cache curl
-    
-    # Probamos conexión al contenedor nginx levantado por compose
-    - curl -v http://docker:80 || echo "Si falla aquí, revisaremos la red de dind"
 
-# FASE 3: DEPLOY 
+    - curl -f http://docker:80
+    
 push_to_registry:
   stage: deploy
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
-    - echo "Subiendo imágenes al registro..."
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     
     # Backend
     - docker build -t $CI_REGISTRY_IMAGE/fastapi:latest ./fastapi
