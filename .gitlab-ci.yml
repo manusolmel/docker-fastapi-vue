@@ -29,15 +29,7 @@ integration_test:
   before_script:
     - apk update && apk add --no-cache docker-cli-compose
     # check loop
-    - |
-      for i in $(seq 1 30); do
-        if docker info >/dev/null 2>&1; then
-        echo "Docker is ready"
-        break
-        fi
-        echo "Waiting for Docker daemon..."
-        sleep 2
-      done
+    - until docker info >/dev/null 2>&1; do sleep 1; done
   script:
     - cp .env.sample .env
     - docker compose up -d --wait
