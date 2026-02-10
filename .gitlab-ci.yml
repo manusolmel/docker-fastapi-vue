@@ -8,7 +8,7 @@ services:
         - /bin/sh
         - -c
         - |
-          echo" -----BEGIN CERTIFICATE-----
+          echo " -----BEGIN CERTIFICATE-----
           MIIEMjCCAxqgAwIBAgIBATANBgkqhkiG9w0BAQsFDNcxMzAxBgNVBAMTKkNsb3Vk
           ZmxhcmUgR2F0ZXdheSBPcmlnaW4gQXV0aGVudGljYXRpb24gS2V5MRMwEQYDVQQK
           EwpDbG91ZGZsYXJlMRMwEQYDVQQHEwpTYW4gRnJhbmNpc2NvMRMwEQYDVQQIEwpD
