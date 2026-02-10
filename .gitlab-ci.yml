@@ -8,7 +8,6 @@ services:
 variables: 
   DOCKER_TLS_CERTDIR: ""
   DOCKER_HOST: tcp://docker:2375
-  DOCKER_DRIVER: overlay2
 
   TAG_COMMIT: $CI_REGISTRY_IMAGE/$CI_COMMIT_SHORT_SHA
   TAG_LATEST: $CI_REGISTRY_IMAGE/latest
@@ -32,6 +31,26 @@ check-docker:
     - k8s
 
   script:
+
+    - echo " --- INICIO ANÁLISIS  ---"
+    
+    - echo " [CHECK 1] Hora del Sistema:"
+    - date
+    
+    - echo " [CHECK 2] Configuración DNS (/etc/resolv.conf):"
+    - cat /etc/resolv.conf
+    
+    - echo " [CHECK 3] Test de resolución DNS:"
+    - nslookup registry-1.docker.io
+    
+    - echo " [CHECK 4] Test de conexión HTTPS raw:"
+    - wget -O - -S https://registry-1.docker.io/v2/ 2>&1 || true
+    
+    - echo " --- FIN ANÁLISIS ---"
+
+
+
+
     # Revisar redundancia y gestión de secretos más adelante.
     - cp .env.sample ./$FOLDER/.env
 
