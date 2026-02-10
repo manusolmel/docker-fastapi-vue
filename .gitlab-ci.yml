@@ -4,31 +4,6 @@ services:
   - name: docker:dind
     alias: docker
     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
-#    entrypoint:
-#        - /bin/sh
-#        - -c
-#        - |
-#          echo " -----BEGIN CERTIFICATE-----
-#          MIIEMjCCAxqgAwIBAgIBATANBgkqhkiG9w0BAQsFDNcxMzAxBgNVBAMTKkNsb3Vk
-#          ZmxhcmUgR2F0ZXdheSBPcmlnaW4gQXV0aGVudGljYXRpb24gS2V5MRMwEQYDVQQK
-#          EwpDbG91ZGZsYXJlMRMwEQYDVQQHEwpTYW4gRnJhbmNpc2NvMRMwEQYDVQQIEwpD
-#          YWxpZm9ybmlhMQswCQYDVQQGEwJVUzAeFw0yMDAxMDcwMDIzMDlaFw0zNDExMTYw
-#          MDIzMDlaMDcxMzAxBgNVBAMTKkNsb3VkZmxhcmUgR2F0ZXdheSBPcmlnaW4gQXV0
-#          aGVudGljYXRpb24gS2V5MRMwEQYDVQQKEwpDbG91ZGZsYXJlMRMwEQYDVQQHEwpT
-#          YW4gRnJhbmNpc2NvMRMwEQYDVQQIEwpDYWxpZm9ybmlhMQswCQYDVQQGEwJVUzCC
-#          ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM3u3kBLmZAgSJ3x0g9S5wz+
-#          m6N0iPq4556Fz2V/2c6jC9h39S8Wz/H5rRzFz3yXgDq3L9y5y6y7y5y6y7y5y6y7
-#          y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6
-#          y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5
-#          y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7
-#          AgMBAAGjqzBxMA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMBAf8EBTADAQH/MB0GA1Ud
-#          DgQWBBS+p8y5y6y7y5y6y7y5y6y7y5y6y7TAfBgNVHSMEGDAWgBS+p8y5y6y7y5y6
-#          y7y5y6y7y5y6y7ANBgkqhkiG9w0BAQsFAAOCAQEyi5y6y7y5y6y7y5y6y7y5y6y7
-#          y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6
-#          y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5
-#          y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7y5y6y7
-#          -----END CERTIFICATE-----" >> /etc/ssl/certs/ca-certificates.crt && dockerd-entrypoint.sh --tls=false
-
 
 variables: 
   DOCKER_TLS_CERTDIR: ""
@@ -56,6 +31,9 @@ check-docker:
     - k8s
 
   script:
+    - nslookup registry-1.docker.io
+    - ping -c 1 registry-1.docker.io
+    - docker info | grep -i "Registry"
     # Revisar redundancia y gestión de secretos más adelante.
     - cp .env.sample ./$FOLDER/.env
 
