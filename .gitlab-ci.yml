@@ -3,7 +3,7 @@ image: docker:24.0.5
 services:
   - name: docker:24.0.5-dind
     alias: docker
-    entrypoint: ["dockerd-entrypoint.sh", "--tls=false", "--mtu=1300"]
+    entrypoint: ["dockerd-entrypoint.sh", "--tls=false", "--mtu=800"]
 
 variables: 
   DOCKER_TLS_CERTDIR: ""
