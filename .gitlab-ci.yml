@@ -7,6 +7,7 @@ services:
 variables: 
   DOCKER_TLS_CERTDIR: ""
   DOCKER_HOST: tcp://docker:2375
+  DOCKER_BUILDKIT: 0
 
   TAG_COMMIT: $CI_REGISTRY_IMAGE/$CI_COMMIT_SHORT_SHA
   TAG_LATEST: $CI_REGISTRY_IMAGE/latest
@@ -30,16 +31,6 @@ check-docker:
     - k8s
 
   script:
-
-    # --- BLOQUE DE ESPERA ACTIVA ---
-    - echo "Waiting for Docker . . . "
-    # Intenta conectar cada segundo. Si falla, espera 1s y reintenta.
-    # El '>/dev/null 2>&1' es para que no llene el log de errores mientras espera.
-    - until docker info > /dev/null 2>&1; do sleep 1; done
-    - echo "Docker Ready!"
-    # -------------------------------
-
-
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - echo "$COMPONENT build . . . "
     - docker build -t $TAG_COMMIT-$COMPONENT -t $TAG_LATEST-$COMPONENT ./$FOLDER
