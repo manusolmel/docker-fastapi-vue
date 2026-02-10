@@ -7,8 +7,12 @@ variables:
   DOCKER_TLS_CERTDIR: ""
   DOCKER_HOST: tcp://docker:2375
 
+  TAG_COMMIT: $CI_REGISTRY_IMAGE/$CI_COMMIT_SHORT_SHA
+  TAG_LATEST: $CI_REGISTRY_IMAGE/latest
+
 stages:
   - test
+  - build
 
 check-docker:
   stage: test
@@ -18,3 +22,33 @@ check-docker:
     - echo "Verificando Docker Daemon . . . "
     - docker info
     - echo "Runner listo para crear contenedores."
+
+.build_template:
+  stage: build
+  tags:
+    - k8s
+
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - echo "$COMPONENT build . . . "
+    - docker build -t $TAG_COMMIT-$COMPONENT -t $TAG_LATEST-$COMPONENT ./$FOLDER
+    - docker push $TAG_COMMIT-$COMPONENT
+    - docker push $TAG_LATEST-$COMPONENT
+
+build_fastapi:
+  extends: .build_template
+  variables:
+    COMPONENT: "fastapi"
+    FOLDER: "fastapi"
+
+build_vue:
+  extends: .build_template
+  variables:
+    COMPONENT: "vue"
+    FOLDER: "vue-project"
+
+build_nginx:
+  extends: .build_template
+  variables:
+    COMPONENT: "nginx"
+    FOLDER: "nginx"
