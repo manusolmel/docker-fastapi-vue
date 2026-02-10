@@ -3,7 +3,7 @@ image: docker:latest
 services:
   - name: docker:dind
     alias: docker
-    entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+    entrypoint: ["dockerd-entrypoint.sh", "--tls=false", "--ipv6=false"]
 
 variables: 
   DOCKER_TLS_CERTDIR: ""
