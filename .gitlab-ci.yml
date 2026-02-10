@@ -31,12 +31,6 @@ check-docker:
     - k8s
 
   script:
-    - nslookup registry-1.docker.io
-    - ping -c 1 registry-1.docker.io
-    - docker info | grep -i "Registry"
-    # Revisar redundancia y gestión de secretos más adelante.
-    - cp .env.sample ./$FOLDER/.env
-
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - echo "$COMPONENT build . . . "
     - docker build -t $TAG_COMMIT-$COMPONENT -t $TAG_LATEST-$COMPONENT ./$FOLDER
