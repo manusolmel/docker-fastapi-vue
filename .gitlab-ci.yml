@@ -3,7 +3,7 @@ image: docker:latest
 services:
   - name: docker:dind
     alias: docker
-    entrypoint: ["dockerd-entrypoint.sh", "--tls=false", "--mtu=1200"]
+    entrypoint: ["/bin/sh", "-c", "ip link set eth0 mtu 1200 && dockerd-entrypoint.sh --tls=false"]
 
 variables: 
   DOCKER_TLS_CERTDIR: ""
