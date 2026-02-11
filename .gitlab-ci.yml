@@ -19,7 +19,7 @@ stages:
 check-docker:
   stage: test
   tags:
-#    - k8s
+    - k8s
   script:
     - echo "Verificando Docker Daemon . . . "
     - docker info
@@ -28,7 +28,7 @@ check-docker:
 .build_template:
   stage: build
   tags:
-#    - k8s
+    - k8s
 
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
@@ -58,6 +58,8 @@ build_nginx:
 tls-smoke:
   image: docker:latest
   stage: test
+  tags: 
+    - k8s
   services:
     - name: docker:dind
       alias: docker
