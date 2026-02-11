@@ -54,3 +54,21 @@ build_nginx:
   variables:
     COMPONENT: "nginx"
     FOLDER: "nginx"
+    
+tls-smoke:
+  image: docker:latest
+  stage: test
+  services:
+    - name: docker:dind
+      alias: docker
+      entrypoint: ["dockerd-entrypoint.sh", "--tls=false", "--ipv6=false"]
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
+  script:
+    - apk add --no-cache ca-certificates openssl curl bind-tools
+    - date -Is
+    - echo "DNS:"; nslookup registry-1.docker.io || true
+    - echo "TLS curl:"; curl -svI https://registry-1.docker.io/v2/ 2>&1 | tail -n 30
+    - echo "TLS openssl:"
+    - echo | openssl s_client -connect registry-1.docker.io:443 -servername registry-1.docker.io -tls1_2 2>/dev/null | head -n 25
