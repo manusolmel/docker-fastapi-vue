@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vue
+  namespace: fastapi-vue-test
+spec:
+  selector:
+    app: vue
+  ports:
+    - name: http
+      port: 5173
+      targetPort: 5173
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vue
+  namespace: fastapi-vue-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vue
+  template:
+    metadata:
+      labels:
+        app: vue
+    spec:
+      containers:
+        - name: vue
+          image: registry.gitlab.com/manusolmel/docker-fastapi-vue/vue:REPLACE_ME
+          ports:
+            - containerPort: 5173
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
