@@ -5,40 +5,56 @@ services:
     alias: docker
     entrypoint: ["dockerd-entrypoint.sh", "--tls=false", "--ipv6=false", "--dns=1.1.1.1", "--dns=8.8.8.8"]
 
-variables: 
+variables:
   DOCKER_TLS_CERTDIR: ""
   DOCKER_HOST: tcp://docker:2375
 
-  TAG_COMMIT: $CI_REGISTRY_IMAGE/$CI_COMMIT_SHORT_SHA
-  TAG_LATEST: $CI_REGISTRY_IMAGE/latest
-  
-  DICKER_BUILDKIT: "0"
-  COMPOSE_DOCKER_CLI_BUILD: "0"
+  DOCKER_BUILDKIT: "1"
 
 stages:
   - test
   - build
+  - deploy
 
+# Tests 
 check-docker:
   stage: test
-  tags:
-    - k8s
+  tags: [k8s]
   script:
-    - echo "Verificando Docker Daemon . . . "
+    - echo "Verificando Docker Daemon..."
     - docker info
     - echo "Runner listo para crear contenedores."
 
+tls-smoke:
+  stage: test
+  tags: [k8s]
+  image: docker:latest
+  services:
+    - name: docker:dind
+      alias: docker
+      entrypoint: ["dockerd-entrypoint.sh", "--tls=false", "--ipv6=false", "--dns=1.1.1.1", "--dns=8.8.8.8"]
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
+  script:
+    - apk add --no-cache ca-certificates openssl curl bind-tools
+    - date -Is
+    - echo "DNS:"; nslookup registry-1.docker.io || true
+    - echo "TLS curl:"; curl -svI https://registry-1.docker.io/v2/ 2>&1 | tail -n 30
+    - echo "TLS openssl:"
+    - echo | openssl s_client -connect registry-1.docker.io:443 -servername registry-1.docker.io -tls1_2 2>/dev/null | head -n 25
+
+# Build & Push 
 .build_template:
   stage: build
-  tags:
-    - k8s
-
+  tags: [k8s]
   script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - echo "$COMPONENT build . . . "
-    - docker build -t $TAG_COMMIT-$COMPONENT -t $TAG_LATEST-$COMPONENT ./$FOLDER
-    - docker push $TAG_COMMIT-$COMPONENT
-    - docker push $TAG_LATEST-$COMPONENT
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    - echo "Building $COMPONENT from ./$FOLDER"
+    - docker build -t "$CI_REGISTRY_IMAGE/$COMPONENT:$CI_COMMIT_SHA" "./$FOLDER"
+    - docker push "$CI_REGISTRY_IMAGE/$COMPONENT:$CI_COMMIT_SHA"
+    - docker tag "$CI_REGISTRY_IMAGE/$COMPONENT:$CI_COMMIT_SHA" "$CI_REGISTRY_IMAGE/$COMPONENT:latest"
+    - docker push "$CI_REGISTRY_IMAGE/$COMPONENT:latest"
 
 build_fastapi:
   extends: .build_template
@@ -57,23 +73,29 @@ build_nginx:
   variables:
     COMPONENT: "nginx"
     FOLDER: "nginx"
-    
-tls-smoke:
-  image: docker:latest
-  stage: test
-  tags: 
-    - k8s
-  services:
-    - name: docker:dind
-      alias: docker
-      entrypoint: ["dockerd-entrypoint.sh", "--tls=false", "--ipv6=false"]
-  variables:
-    DOCKER_TLS_CERTDIR: ""
-    DOCKER_HOST: tcp://docker:2375
+
+# Deploy (GitLab Agent)
+deploy_prod:
+  stage: deploy
+  tags: [k8s]
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
   script:
-    - apk add --no-cache ca-certificates openssl curl bind-tools
-    - date -Is
-    - echo "DNS:"; nslookup registry-1.docker.io || true
-    - echo "TLS curl:"; curl -svI https://registry-1.docker.io/v2/ 2>&1 | tail -n 30
-    - echo "TLS openssl:"
-    - echo | openssl s_client -connect registry-1.docker.io:443 -servername registry-1.docker.io -tls1_2 2>/dev/null | head -n 25
+    - kubectl config get-contexts
+
+    - kubectl config use-context "manusolmel/docker-fastapi-vue:backend-frontend-project"
+
+    # Aplicamos manifests 
+    - kubectl apply -f k8s/
+
+    # Pin de imágenes por commit
+    - kubectl -n fastapi-vue-test set image deploy/fastapi fastapi="$CI_REGISTRY_IMAGE/fastapi:$CI_COMMIT_SHA"
+    - kubectl -n fastapi-vue-test set image deploy/vue vue="$CI_REGISTRY_IMAGE/vue:$CI_COMMIT_SHA"
+    - kubectl -n fastapi-vue-test set image deploy/nginx nginx="$CI_REGISTRY_IMAGE/nginx:$CI_COMMIT_SHA"
+
+    # Espera rollout
+    - kubectl -n fastapi-vue-test rollout status deploy/fastapi --timeout=180s
+    - kubectl -n fastapi-vue-test rollout status deploy/nginx --timeout=180s
