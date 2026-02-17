@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
+const version = import.meta.env.VITE_APP_VERSION || 'dev'
+
 const motos = ref([])
 const nuevaMoto = ref({ brand: '', model: '', stock: true })
 
@@ -45,6 +47,16 @@ onMounted(async () => {
 </form>
 
   <h1>Garaje de Motos</h1>
+
+  <p style="color:#fff; background:#000; padding:6px 10px; display:inline-block; margin:10px 0;">
+  Version: {{ version }}
+  </p>
+
+
+  <div style="opacity:.7; font-size:.9em; margin-bottom:10px;">
+  Version: {{ version }}
+  </div>
+
   <ul>
     <li v-for="moto in motos" :key="moto.id">
       {{ moto.brand }} - {{ moto.model }} (Stock: {{ moto.stock }})

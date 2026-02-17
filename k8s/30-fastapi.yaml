@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: fastapi
-          image: registry.gitlab.com/manusolmel/docker-fastapi-vue/fastapi:REPLACE_ME
+          image: registry.gitlab.com/manusolmel/docker-fastapi-vue/fastapi:latest
           ports:
             - containerPort: 8000
           env:
