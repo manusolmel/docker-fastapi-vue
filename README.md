@@ -1,1 +1,1 @@
-# Este es el readme canónico
+# README
